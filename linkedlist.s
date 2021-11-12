@@ -52,7 +52,7 @@ main:
 		ldr r2, =tail 		@ load tail into r2 again to change the tail's pointer addr
 		str r0, [r2] 		@ store node to where tails pointer is pointing to, so new node = tail
 
-	read: @ reads int into r0 and then stores the result into r1
+	readint: @ reads int into r0 and then stores the result into r1
 		
 		ldr r1, =InFileHandle
 		ldr r0, [ r1, #0 ] 		@ load file handle into r0
@@ -60,7 +60,14 @@ main:
 		mov r1, r0 		@ move int read into r1
 		mov pc, lr		@ move to next line where read was called from
 
-	
+	readstr: @ reads a string from the txt file
+		
+		mov r1, #6		@ allocate 6 bytes for r1
+		ldr r0, =InFileHandle	@ load file handler into r0
+		mov r2, #6		@ load max # of bytes to store in r2
+		swi 0x6a		@ read string from file
+		mov pc, lr		@ move to next line after the readstr call
+		
 
 	@@@@ TODO --- delete with index
 
