@@ -120,3 +120,5 @@ InFileHandle: .word 0
 Space: .ascii " "
 found: .ascii "Found!"
 nfound: .ascii "Not Found"
+OutFileName: .ascii "output.txt"
+OutFileHandle: .word 0
