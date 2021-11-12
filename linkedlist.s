@@ -62,10 +62,10 @@ main:
 
 	readstr: @ reads a string from the txt file
 		
-		mov r1, #6		@ allocate 6 bytes for r1
+		mov r1, #1		@ allocate 6 bytes for r1
 		ldr r0, =InFileHandle	@ load file handler into r0
-		mov r2, #6		@ load max # of bytes to store in r2
-		swi 0x6a		@ read string from file
+		mov r2, #1		@ load max # of bytes to store in r2
+		swi 0x6a		@ read string from file and load into r1
 		mov pc, lr		@ move to next line after the readstr call
 		
 	clear:	@ clears whole list
@@ -87,10 +87,21 @@ main:
 		str r3, [r0]
 		mov pc, lr
 
+	contains:
+		ldr r1, =head 		@ load head into r1 because r0 = search int
+		ldr r1, [r1] 		@ dereference node
+
+	searchloop:
+		cmp r1, #0 		@ if node we are on is null then end loop
+		beq notfound 		@ finish loop if N == null
+		ldr r2, [r1, #0]	@ load int from node we are on currently
+		cmp r2, r0		@ compare int from current node to search integer
+		beq found		@ branch to found if we found the integer
+		ldr r1, [ r1, #4 ]	@ move to next node
+		b searchloop
+	
 
 	@@@@ TODO --- delete with index
-
-	@@@@ TODO --- clear method
 
 	@@@@ TODO --- contains
 
@@ -107,3 +118,5 @@ tail: .word 0
 InFileName: .ascii "values.txt"
 InFileHandle: .word 0
 Space: .ascii " "
+found: .ascii "Found!"
+nfound: .ascii "Not Found"
