@@ -68,6 +68,25 @@ main:
 		swi 0x6a		@ read string from file
 		mov pc, lr		@ move to next line after the readstr call
 		
+	clear:	@ clears whole list
+		ldr r0, =head		@ load in head pointer
+		ldr r0, [r0]		@ dereference head pointer
+		mov r3, #0
+	clearloop:
+		cmp r0, #0
+		beq cleared
+		ldr r1, [r0, #4]
+		str r3, [r0]
+		str r3, [r0, #4]
+		mov r0, r1
+		b clearloop
+	cleared:
+		ldr r0, =head
+		str r3, [r0]
+		ldr r0, =tail
+		str r3, [r0]
+		mov pc, lr
+
 
 	@@@@ TODO --- delete with index
 
