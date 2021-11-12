@@ -36,7 +36,31 @@ main:
 
 	str r3, [r0, #4]		@ set next pointer to null
 
-	@@@@ TODO --- add with index
+	@@@@ PUSH
+
+	push: @ pushes a node to the end of the list
+
+		bl read 		@ make r1 = next int in file
+		mov r0, #8 		@ set r0 to be 8 bytes for allocation at next step
+		swi 0x12 		@ allocate 8 bytes because r0 is 8
+		str r1 [ r0, #0 ] 		@ set new node value to be r1
+		mov r1, #0 		@ set r1 to be null
+		str r1, [ r0, #4 ] 		@ set new node next to be null
+		ldr r2, =tail 		@ load tail data header into r2
+		ldr r2, [r2] 		@ dereference tail
+		str r0, [ r2, #4 ] 		@ store address of new node in tails next
+		ldr r2, =tail 		@ load tail into r2 again to change the tail's pointer addr
+		str r0, [r2] 		@ store node to where tails pointer is pointing to, so new node = tail
+
+	read: @ reads int into r0 and then stores the result into r1
+		
+		ldr r1, =InFileHandle
+		ldr r0, [ r1, #0 ] 		@ load file handle into r0
+		swi 0x6c 		@ r0 = int read
+		mov r1, r0 		@ move int read into r1
+		mov pc, lr		@ move to next line where read was called from
+
+	
 
 	@@@@ TODO --- delete with index
 
