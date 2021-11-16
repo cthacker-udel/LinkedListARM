@@ -12,11 +12,11 @@ main:
 
 	@@@ initialize outfilehandle
 
-	ldr r0, =OutFileName		@ set r0 = OutFileName
-	mov r1, #0			@ set r1 = type of mode (0 = input)
-	swi 0x66
-	ldr r1, =OutFileHandle		@ get pointer to OutFileHandle in r1
-	str r0, [r1, #0]		@ store file handle in dereferenced filehandle
+	@ldr r0, =OutFileName		@ set r0 = OutFileName
+	@mov r1, #0			@ set r1 = type of mode (0 = input)
+	@swi 0x66
+	@ldr r1, =OutFileHandle		@ get pointer to OutFileHandle in r1
+	@str r0, [r1, #0]		@ store file handle in dereferenced filehandle
 
 	@read first integer from file
 
