@@ -85,14 +85,14 @@ main:
 		beq contains		@ go to contains loop if command is f
 		cmp r3, 0x70		@ check if command is p for 
 
-	found:	@@ outputs found and the number to the file
+	fndfnc:	@@ outputs found and the number to the file
 		mov r0, =found
 		swi 0x02
 		mov r0, r2
 		swi 0x00
 		mov pc, lr
 
-	notfound: @@ outputs not found and the number to the file
+	nffnc: @@ outputs not found and the number to the file
 		mov r0, =nfound
 		swi 0x02
 		mov r0, r2
@@ -124,10 +124,10 @@ main:
 
 	searchloop:
 		cmp r1, #0 		@ if node we are on is null then end loop
-		beq notfound 		@ finish loop if N == null
+		beq nffnc		@ finish loop if N == null
 		ldr r2, [r1, #0]	@ load int from node we are on currently
 		cmp r2, r0		@ compare int from current node to search integer
-		beq found		@ branch to found if we found the integer
+		beq fndfnc		@ branch to found if we found the integer
 		ldr r1, [ r1, #4 ]	@ move to next node
 		b searchloop
 	
