@@ -1,5 +1,5 @@
 .align 4
-.text 
+.text
 main:
 
 	@@@@@@@@@@ READ INT FROM FILE
@@ -148,7 +148,7 @@ main:
 .data
 head: .word 0
 tail: .word 0
-InFileName: .ascii "values.txt"
+InFileName: .ascii "list.txt"
 InFileHandle: .word 0
 Space: .ascii " "
 found: .ascii "Found!"
