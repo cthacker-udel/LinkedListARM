@@ -51,7 +51,8 @@ main:
 		bl read 		@ make r1 = next int in file
 		mov r0, #8 		@ set r0 to be 8 bytes for allocation at next step
 		swi 0x12 		@ allocate 8 bytes because r0 is 8
-		str r1 [ r0, #0 ] 		@ set new node value to be r1
+		@@  debugged --- commented out to run | str r1 [ r0, #0 ] 	@ set new node value to be r1
+		mov r6, r1
 		mov r1, #0 		@ set r1 to be null
 		str r1, [ r0, #4 ] 		@ set new node next to be null
 		ldr r2, =tail 		@ load tail data header into r2
@@ -75,7 +76,29 @@ main:
 		mov r2, #1		@ load max # of bytes to store in r2
 		swi 0x6a		@ read string from file and load into r1
 		mov pc, lr		@ move to next line after the readstr call
+	
+	readcmd: @ reads command from txt file
+		bl readstr		@ read command from file
+		mov r3, r1		@ move string read into r3
+		cmp r3, 0x66		@ check if command is f for find
+		bl readint		@ read integer into r1
+		beq contains		@ go to contains loop if command is f
+		cmp r3, 0x70		@ check if command is p for 
+
+	found:	@@ outputs found and the number to the file
+		mov r0, =found
+		swi 0x02
+		mov r0, r2
+		swi 0x00
+		mov pc, lr
+
+	notfound: @@ outputs not found and the number to the file
+		mov r0, =nfound
+		swi 0x02
+		mov r0, r2
+		swi 0x00
 		
+
 	clear:	@ clears whole list
 		ldr r0, =head		@ load in head pointer
 		ldr r0, [r0]		@ dereference head pointer
