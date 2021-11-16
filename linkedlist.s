@@ -80,20 +80,20 @@ main:
 	readcmd: @ reads command from txt file
 		bl readstr		@ read command from file
 		mov r3, r1		@ move string read into r3
-		cmp r3, 0x66		@ check if command is f for find
+		cmp r3, #0x66		@ check if command is f for find
 		bl readint		@ read integer into r1
 		beq contains		@ go to contains loop if command is f
-		cmp r3, 0x70		@ check if command is p for 
+		cmp r3, #0x70		@ check if command is p for 
 
 	fndfnc:	@@ outputs found and the number to the file
-		mov r0, =found
+		ldr r0, =found
 		swi 0x02
 		mov r0, r2
 		swi 0x00
 		mov pc, lr
 
 	nffnc: @@ outputs not found and the number to the file
-		mov r0, =nfound
+		ldr r0, =nfound
 		swi 0x02
 		mov r0, r2
 		swi 0x00
