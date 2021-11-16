@@ -46,6 +46,8 @@ main:
 
 	str r3, [r0, #4]		@ set next pointer to null
 
+	b readcmd
+
 	@@@@ PUSH
 
 	push: @ pushes a node to the end of the list
@@ -155,3 +157,5 @@ found: .ascii "Found!"
 nfound: .ascii "Not Found"
 OutFileName: .ascii "output.txt"
 OutFileHandle: .word 0
+CmdFileName: .ascii "cmds.txt"
+CmdFileHandle: .word 0
