@@ -1,3 +1,5 @@
+.align 4
+.text 
 main:
 
 	@@@@@@@@@@ READ INT FROM FILE
