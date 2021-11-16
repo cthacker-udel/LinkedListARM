@@ -50,7 +50,7 @@ main:
 
 	push: @ pushes a node to the end of the list
 
-		bl read 		@ make r1 = next int in file
+		bl readint 		@ make r1 = next int in file
 		mov r0, #8 		@ set r0 to be 8 bytes for allocation at next step
 		swi 0x12 		@ allocate 8 bytes because r0 is 8
 		@@  debugged --- commented out to run | str r1 [ r0, #0 ] 	@ set new node value to be r1
