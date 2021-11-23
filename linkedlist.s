@@ -24,6 +24,12 @@ main:
 	swi 0x66			@@ set r0 = fileHandle
 	ldr r1, =CmdFileHandle		@@ load cmd file pointer into r1
 	str r0, [r1, #1]		@@ store cmd file handle into cmdfilehandle pointer
+	ldr r1, =CmdList		@@ load storage command string
+	mov r2, #99			@@ load max # of bytes to store to 9999
+	swi 0x6a			@@ load string into CmdList
+	mov r0, #0			@@ load first index into r0
+	ldr r1, =CurrCmdIndex		@@ load place where we are storing current command index
+	str r0, [r1, #5]			@@ store number at CurrCmdIndex[ind]
 
 	@read first integer from file
 
@@ -82,19 +88,20 @@ main:
 
 	readstr: @ reads a string from the txt file
 		
-		mov r1, #1		@ allocate 6 bytes for r1
-		ldr r0, =InFileHandle	@ load file handler into r0
-		mov r2, #1		@ load max # of bytes to store in r2
-		swi 0x6a		@ read string from file and load into r1
+		ldr r0, =CurrCmdIndex
+		ldr r0, [r0]		@ load current index from CurrCmdIndex
+		ldr r1, =CmdList	@ load command string into r1
+		ldrb r0, [r1,r0]	@ load character from cmdList
 		mov pc, lr		@ move to next line after the readstr call
 	
 	readcmd: @ reads command from txt file
 		bl readstr		@ read command from file
 		mov r3, r1		@ move string read into r3
 		cmp r3, #0x66		@ check if command is f for find
-		bl readint		@ read integer into r1
+		bleq readint		@ read integer into r1
 		beq contains		@ go to contains loop if command is f
-		cmp r3, #0x70		@ check if command is p for 
+		cmp r3, #0x70		@ check if command is p for push
+		beq push		@ if command is equal, move to push
 
 	fndfnc:	@@ outputs found and the number to the file
 		ldr r0, =found
@@ -167,3 +174,4 @@ OutFileHandle: .skip 4
 CmdFileName: .ascii "cmd.txt\0"
 CmdFileHandle: .skip 4
 CmdList: .skip 9999
+CurrCmdIndex: .skip 4
