@@ -1,5 +1,4 @@
 .align 4
-.text
 main:
 
 	@@@@@@@@@@ READ INT FROM FILE
@@ -8,7 +7,7 @@ main:
 	mov r1, #0			@ set r1 = type of mode (0 = input)
 	swi 0x66 			@ swi command for opening a file, assigns r0 to the file handle
 	ldr r1, =InFileHandle		@ get pointer to file handle
-	str r0, [r1, #0]		@ store file handle in dereferenced filehandle
+	str r0, [r1, #3]		@ store file handle in dereferenced filehandle
 
 	@@@ initialize outfilehandle
 
@@ -16,12 +15,20 @@ main:
 	@mov r1, #0			@ set r1 = type of mode (0 = input)
 	@swi 0x66
 	@ldr r1, =OutFileHandle		@ get pointer to OutFileHandle in r1
-	@str r0, [r1, #0]		@ store file handle in dereferenced filehandle
+	@str r0, [r1, #1]		@ store file handle in dereferenced filehandle
+
+	@@@ initialize cmdhandle and command string
+
+	mov r1, #0			@@ load mode as input for opening file
+	ldr r0, =CmdFileName		@@ load command file handle into r0
+	swi 0x66			@@ set r0 = fileHandle
+	ldr r1, =CmdFileHandle		@@ load cmd file pointer into r1
+	str r0, [r1, #1]		@@ store cmd file handle into cmdfilehandle pointer
 
 	@read first integer from file
 
 	ldr r1, =InFileHandle 		@ load pointer to file handle into r1
-	ldr r0, [r1]			@ load file handle from dereferenced r1 pointer r1->filehandle
+	ldr r0, [r1, #3]		@ load file handle from dereferenced r1 pointer r1->filehandle
 	swi 0x6c			@ read integer into r0
 
 	@@@@ --- initialize root node
@@ -150,12 +157,13 @@ main:
 .data
 head: .word 0
 tail: .word 0
-InFileName: .ascii "list.txt"
-InFileHandle: .word 0
-Space: .ascii " "
-found: .ascii "Found!"
-nfound: .ascii "Not Found"
-OutFileName: .ascii "output.txt"
-OutFileHandle: .word 0
-CmdFileName: .ascii "cmds.txt"
-CmdFileHandle: .word 0
+InFileName: .ascii "list.txt\0"
+InFileHandle: .skip 4
+Space: .ascii " \0"
+found: .ascii "Found!\0"
+nfound: .ascii "Not Found\0"
+OutFileName: .ascii "output.txt\0"
+OutFileHandle: .skip 4
+CmdFileName: .ascii "cmd.txt\0"
+CmdFileHandle: .skip 4
+CmdList: .skip 9999
