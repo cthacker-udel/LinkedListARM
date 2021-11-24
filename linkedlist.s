@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 .align
+=======
+.align 4
+>>>>>>> 18eaaad3bb7a5ba902f1c93f2bc21c52097ac5df
 main:
 
 	@@@@@@@@@@ READ INT FROM FILE
@@ -12,9 +16,6 @@ main:
 	ldr r1, =InFileHandle
 	str r0, [r1]
 	str r2, [r0]
-
-	@ldr r1, =InFileHandle		@ get pointer to file handle
-	@str r0, [r1, #0]		@ store file handle in dereferenced filehandle
 
 	@@@ initialize cmdhandle and command string
 
