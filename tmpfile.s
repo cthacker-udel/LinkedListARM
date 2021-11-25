@@ -10,13 +10,21 @@ main:
 
 	@@ stored file handle in input file
 
-	ldr r0, =CmdFileName			@ initialize r1 to file name
+	ldr r0, =CmdFileName			@ initialize r0 to file name
 	swi 0x02
 	mov r1, #0				@ initialize handler for input
 	swi 0x66				@ set r0 = file handler
 	ldr r1, =CmdFileHandle			@ set r1 = pointer to file handler
 	str r0, [r1]				@ store file handler in pointer to cmdfilehandler
+	
+	@@ allocating commands file handle
 
+	ldr r0, =CommandsFileName		@@ init r0 to file name
+	swi 0x02
+	mov r1, #0
+	swi 0x66
+	ldr r1, =CommandsFileHandle
+	str r0, [r1]
 	
 
 
