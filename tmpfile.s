@@ -2,6 +2,11 @@ main:
 
 	@@@@@@@@@@ READ INT FROM FILE
 
+	@@@ init index @@@
+	mov r0, #0
+	ldr r1, =CurrCmdIndex
+	str r0, [r1]
+
 	ldr r0, =InFileName		@ set r0 = name of file
 	mov r1, #0			@ set r1 = type of mode (0 = input)
 	swi 0x66 			@ swi command for opening a file, assigns r0 to the file handle
@@ -26,6 +31,12 @@ main:
 	ldr r1, =CommandsFileHandle
 	str r0, [r1]
 
+	@@@ load commands into string
+	
+	ldr r1, =CommandsStorage
+	mov r2, #99
+	swi 0x6a
+
 	@@ read first integer from file
 
 	ldr r1, =InFileHandle
@@ -47,7 +58,48 @@ main:
 	str r1, [r12, #8]			@ store null pointer in tails next
 	ldr r12, =head
 	str r1, [r12, #8]			@ store null pointer in heads next
+	
+	@@@ <<<<<<<<<<<<<<<< ROOT NODE INITIALIZED >>>>>>>>>>>>>>>>>>>>>> @@@
 
+	b readcmd
+
+readint: @ reads int into r0 and then stores result in r1
+	ldr r1, =InFileHandle		@@ set pointer to handler to r1
+	ldr r0, [r1]			@@ dereference pointer to handler
+	swi 0x6c			@@ read int
+	mov r1, r0			@ move int read into r1
+	mov pc, lr			@ mov to next line of line that called it
+
+readstr: @ reads a string from txt file
+	ldr r1, =CurrCmdIndex		@@ load pointer to current index of command into r1
+	ldr r0, [r1]			@@ load current index into r0
+	ldr r1, =CommandsStorage		@@ load current string
+	ldrb r2, [r1, r0]		@@ load character at string[r0]
+	ldr r1, =CurrCmdIndex
+	add r0, r0, #2			@@ add two spaces to currIndex of commmand
+	str r0, [r1]			@@ store incremented index into CurrCmdIndex pointer
+	mov r0, r2			@@ store command in r0
+	mov pc, lr
+
+readcmd: @ reads command from text file
+	bl readstr
+	cmp r0, #112 			@@ 112 = p - push
+	beq push
+	cmp r0, #102			@@ 104 = f - find
+	beq find
+	@@ potentially make one for delete
+
+push:	@@ appends node onto list
+	@@@@ ARGS
+	@@@ r1 = number to push
+	@@@ r0 = pointer that we will be cycling down with r2
+	bl readint	 @@ store int to push into r1
+	ldr r0, =head	 @@ store head pointer into r0
+pushloop:	@@ test, see if weve reached the end of the list
+	ldr r2, [r0,#8]		@@ check next pointer
+	cmp r2, #0		@ if null, then we found the spot to create new node
+	
+	
 
 
 .data
@@ -68,3 +120,8 @@ CmdFileHandle: .word 0
 CommandsFileName: .asciz "commands.txt"
 .align 4
 CommandsFileHandle: .word 0
+.align 4
+CommandsStorage: .skip 999
+.align 4
+CurrCmdIndex: .word 0
+
