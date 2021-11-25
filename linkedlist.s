@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 .align
-=======
-.align 4
->>>>>>> 18eaaad3bb7a5ba902f1c93f2bc21c52097ac5df
 main:
 
 	@@@@@@@@@@ READ INT FROM FILE
@@ -11,8 +7,6 @@ main:
 	mov r1, #0			@ set r1 = type of mode (0 = input)
 	swi 0x66 			@ swi command for opening a file, assigns r0 to the file handle
 	mov r2, r0			@ save file handle in r1
-	mov r0, #4			@ allocate a byte for memory
-	swi 0x12
 	ldr r1, =InFileHandle
 	str r0, [r1]
 	str r2, [r0]
@@ -164,16 +158,16 @@ main:
 
 
 .data
-head: .word 0
-tail: .word 0
+@head: .word 0
+@tail: .word 0
 InFileName: .ascii "list.txt\0"
 InFileHandle: .word 0
-Space: .ascii " \0"
-found: .ascii "Found!\0"
-nfound: .ascii "Not Found\0"
-OutFileName: .ascii "output.txt\0"
-OutFileHandle: .word 4
-CmdFileName: .ascii "cmd.txt\0"
-CmdFileHandle: .word 4
-CmdList: .skip 9999
-CurrCmdIndex: .byte 0
+@Space: .ascii " \0"
+@found: .ascii "Found!\0"
+@nfound: .ascii "Not Found\0"
+@OutFileName: .ascii "output.txt\0"
+@OutFileHandle: .word 4
+@CmdFileName: .ascii "cmd.txt\0"
+@CmdFileHandle: .word 4
+@CmdList: .skip 9999
+@CurrCmdIndex: .byte 0
