@@ -16,10 +16,10 @@ main:
 	@@ stored file handle in input file
 
 	ldr r0, =CmdFileName			@ initialize r0 to file name
-	mov r1, #2				@ initialize handler for input
+	mov r1, #1				@ initialize handler for input
 	swi 0x66				@ set r0 = file handler
 	ldr r1, =CmdFileHandle			@ set r1 = pointer to file handler
-	str r0, [r1]				@ store file handler in pointer to cmdfilehandler
+	str r0, [r1]
 
 	@@ allocating commands file handle
 
@@ -137,8 +137,9 @@ printlistloop:
 	beq printlistendloop
 	mov r2, r0
 	ldr r1, [r0, #4]	@@ copy int of node into r1
-	ldr r0, =string
-	swi 0x0b
+	ldr r0, =CmdFileHandle
+	ldr r0, [r0]
+	swi 0x6b		@@ display integer read in
 	mov r0, r1
 	mov r2, r0
 	ldr r0, =InFileName
@@ -149,6 +150,8 @@ printlistloop:
 printlistendloop:
 	mov pc, lr
 
+halt:
+	swi 0x11
 
 .data
 
