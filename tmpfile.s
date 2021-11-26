@@ -44,7 +44,7 @@ main:
 	@@ init root node
 
 	mov r1, r0				@ store integer read into r1
-	mov r0, #4				@ prepare to allocate for node
+	mov r0, #8				@ prepare to allocate for node
 	swi 0x12
 	ldr r12, =head				@ load pointer to head in r12
 	str r0, [r12]				@ store pointer to head in pointer to head label
@@ -67,8 +67,8 @@ main:
 	@@@ <<<<<<<<<<<<<<<< ROOT NODE INITIALIZED >>>>>>>>>>>>>>>>>>>>>> @@@
 
 	@@@ <<<<<<<<<< NODE FORMAT >>>>>>>>>> @@@
-	@@		NODE[4] = NEXT POINTER
-	@@		NODE[8] = INT VALUE
+	@@		NODE[0] = NEXT POINTER
+	@@		NODE[4] = INT VALUE
 
 	b readcmd
 
@@ -118,7 +118,7 @@ pushloop:	@@ test, see if weve reached the end of the list
 pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
 	  @@ ARGS
 	mov r3, r0		@@ copy pointer to current spot to r3
-	mov r0, #4
+	mov r0, #8
 	ldr r4, [r3, #4]	@@ DEBUG
 	swi 0x12		@@ allocate 2 bytes for node to be placed at
 	ldr r4, [r3, #4]	@@ DEBUG
