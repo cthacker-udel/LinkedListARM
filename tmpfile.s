@@ -20,7 +20,7 @@ main:
 	swi 0x66				@ set r0 = file handler
 	ldr r1, =CmdFileHandle			@ set r1 = pointer to file handler
 	str r0, [r1]				@ store file handler in pointer to cmdfilehandler
-	
+
 	@@ allocating commands file handle
 
 	ldr r0, =CommandsFileName		@@ init r0 to file name
@@ -54,8 +54,10 @@ main:
 	str r0, [r12]				@ store pointer to node in tail
 	@@ INIT NULL POINTER to both tail and heads next
 	mov r1, #0
+	ldr r12, [r12]
 	str r1, [r12, #0]			@ store null pointer in tails next
 	ldr r12, =head
+	ldr r12, [r12]
 	str r1, [r12, #0]			@ store null pointer in heads next
 	
 	@@@ <<<<<<<<<<<<<<<< ROOT NODE INITIALIZED >>>>>>>>>>>>>>>>>>>>>> @@@
@@ -101,8 +103,9 @@ push:	@@ appends node onto list
 	@@@ r0 = pointer that we will be cycling down with r2
 	bl readint	 @@ store int to push into r1
 	ldr r0, =head	 @@ store head pointer into r0
+	ldr r0, [r0]
 pushloop:	@@ test, see if weve reached the end of the list
-	ldr r2, [r0,#4]		@@ check next pointer
+	ldr r2, [r0,#0]		@@ check next pointer
 	cmp r2, #0		@ if null, then we found the spot to create new node
 	beq pushdone
 	ldr r0, [r0, #4]	@ set next point to next node
@@ -123,9 +126,10 @@ printlist:	@ prints linked list
 printlistloop:
 	cmp r0, #0
 	beq printlistendloop
-	mov r1, r0
-	ldr r0, [r0, #4]	@@ copy int of node into r1
-	swi 0x00		@@ display integer read in
+	mov r2, r0
+	ldr r1, [r0, #4]	@@ copy int of node into r1
+	ldr r0, =CmdFileHandle
+	swi 0x6b		@@ display integer read in
 	mov r0, r1
 	mov r2, r0
 	ldr r0, =InFileName
@@ -161,4 +165,7 @@ CommandsStorage: .skip 999
 CurrCmdIndex: .word 0
 .align 4
 commaSeparator: .asciz ", "
-
+.align 4
+OutputFileName: .asciz "output.txt"
+.align 4
+OutputFileHandler: .word 0
