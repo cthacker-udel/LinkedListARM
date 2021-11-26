@@ -60,11 +60,15 @@ main:
 	ldr r12, [r12]
 	str r1, [r12, #0]			@ store null pointer in heads next
 	
+	ldr r1, =head				@@ DEBUG
+	ldr r1, [r1]				@@ DEBUG
+	ldr r4, [r1, #4]			@@ DEBUG
+
 	@@@ <<<<<<<<<<<<<<<< ROOT NODE INITIALIZED >>>>>>>>>>>>>>>>>>>>>> @@@
 
 	@@@ <<<<<<<<<< NODE FORMAT >>>>>>>>>> @@@
-	@@		NODE[0] = NEXT POINTER
-	@@		NODE[4] = INT VALUE
+	@@		NODE[4] = NEXT POINTER
+	@@		NODE[8] = INT VALUE
 
 	b readcmd
 
@@ -104,6 +108,7 @@ push:	@@ appends node onto list
 	bl readint	 @@ store int to push into r1
 	ldr r0, =head	 @@ store head pointer into r0
 	ldr r0, [r0]
+	ldr r4, [r0, #4]	@@ DEBUG
 pushloop:	@@ test, see if weve reached the end of the list
 	ldr r2, [r0,#0]		@@ check next pointer
 	cmp r2, #0		@ if null, then we found the spot to create new node
@@ -114,15 +119,19 @@ pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
 	  @@ ARGS
 	mov r3, r0		@@ copy pointer to current spot to r3
 	mov r0, #4
+	ldr r4, [r3, #4]	@@ DEBUG
 	swi 0x12		@@ allocate 2 bytes for node to be placed at
+	ldr r4, [r3, #4]	@@ DEBUG
 	str r1, [r0, #4]	@@ store int at base addr of r0
 	mov r1, #0		@@ init r3 to null pointer
 	str r1, [r0]		@@ set next pointer to be null in last node
+	ldr r4, [r3, #4]	@@ DEBUG	<--- this is where bug happens
 	str r0, [r3, #0]	@@ store next pointer
 	bl printlist
 	b readcmd
 printlist:	@ prints linked list
 	ldr r0, =head
+	ldr r0, [r0]		@@ dereference node
 printlistloop:
 	cmp r0, #0
 	beq printlistendloop
