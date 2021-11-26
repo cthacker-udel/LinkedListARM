@@ -54,7 +54,6 @@ main:
 	@@ correct
 	ldr r12, =tail
 	str r0, [r12]				@ store pointer to node in tail
-	str r1, [r0, #4]			@ storing integer in tails node value spot
 	@@ INIT NULL POINTER to both tail and heads next
 	mov r1, #0
 	str r1, [r12, #0]			@ store null pointer in tails next
@@ -93,6 +92,8 @@ readcmd: @ reads command from text file
 	cmp r0, #112 			@@ 112 = p - push
 	bleq push
 	cmp r0, #102			@@ 104 = f - find
+	cmp r0, #0			@@ done reading, printList
+	b printlist
 	@@ TODO: beq find
 	@@ potentially make one for delete
 
@@ -117,16 +118,18 @@ pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
 	mov r1, #0		@@ init r3 to null pointer
 	str r1, [r0]		@@ set next pointer to be null in last node
 	str r0, [r3, #0]	@@ store next pointer
-	mov pc, lr
+	b readcmd
 printlist:	@ prints linked list
 	ldr r0, =head
 printlistloop:
 	cmp r0, #0
 	beq printlistendloop
-	str r1, [r0, #4]	@@ copy int of node into r1
+	mov r1, r0
+	ldr r0, [r0, #4]	@@ copy int of node into r1
 	swi 0x00		@@ display integer read in
+	mov r0, r1
 	mov r2, r0
-	ldr r0, =commpaSeparator
+	ldr r0, =commaSeparator
 	swi 0x02		@@ display comma onto console
 	mov r0, r2
 	ldr r0, [r0]		@@ load next node
