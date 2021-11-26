@@ -16,7 +16,6 @@ main:
 	@@ stored file handle in input file
 
 	ldr r0, =CmdFileName			@ initialize r0 to file name
-	swi 0x02
 	mov r1, #1				@ initialize handler for input
 	swi 0x66				@ set r0 = file handler
 	ldr r1, =CmdFileHandle			@ set r1 = pointer to file handler
@@ -25,7 +24,6 @@ main:
 	@@ allocating commands file handle
 
 	ldr r0, =CommandsFileName		@@ init r0 to file name
-	swi 0x02
 	mov r1, #0
 	swi 0x66
 	ldr r1, =CommandsFileHandle
@@ -104,10 +102,10 @@ push:	@@ appends node onto list
 	bl readint	 @@ store int to push into r1
 	ldr r0, =head	 @@ store head pointer into r0
 pushloop:	@@ test, see if weve reached the end of the list
-	ldr r2, [r0,#8]		@@ check next pointer
+	ldr r2, [r0,#4]		@@ check next pointer
 	cmp r2, #0		@ if null, then we found the spot to create new node
 	beq pushdone
-	ldr r0, [r0, #8]	@ set next point to next node
+	ldr r0, [r0, #4]	@ set next point to next node
 	b pushloop
 pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
 	  @@ ARGS
@@ -118,6 +116,7 @@ pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
 	mov r1, #0		@@ init r3 to null pointer
 	str r1, [r0]		@@ set next pointer to be null in last node
 	str r0, [r3, #0]	@@ store next pointer
+	bl printlist
 	b readcmd
 printlist:	@ prints linked list
 	ldr r0, =head
@@ -129,7 +128,7 @@ printlistloop:
 	swi 0x00		@@ display integer read in
 	mov r0, r1
 	mov r2, r0
-	ldr r0, =commaSeparator
+	ldr r0, =InFileName
 	swi 0x02		@@ display comma onto console
 	mov r0, r2
 	ldr r0, [r0]		@@ load next node
