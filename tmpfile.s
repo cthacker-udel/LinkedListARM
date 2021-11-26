@@ -50,7 +50,10 @@ main:
 	swi 0x12
 	ldr r12, =head				@ load pointer to head in r12
 	str r0, [r12]				@ store pointer to head in pointer to head label
+	mov r3, #0				@ set null value to be 0
+	str r3, [r0]				@ set next pointer of new node to be NULL
 	str r1, [r0, #4]			@ store integer ( node value ) into head's 4-8 bytes
+	@@ correct
 	ldr r12, =tail
 	str r0, [r12]				@ store pointer to node in tail
 	str r1, [r0, #4]			@ storing integer in tails node value spot
