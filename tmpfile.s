@@ -98,7 +98,12 @@ push:	@@ appends node onto list
 pushloop:	@@ test, see if weve reached the end of the list
 	ldr r2, [r0,#8]		@@ check next pointer
 	cmp r2, #0		@ if null, then we found the spot to create new node
-	
+	beq pushdone
+	ldr r0, [r0, #8]	@ set next point to next node
+	b pushloop
+pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
+	  @@ ARGS
+	  
 	
 
 
