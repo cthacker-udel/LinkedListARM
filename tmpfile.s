@@ -73,6 +73,7 @@ readint: @ reads int into r0 and then stores result in r1
 	ldr r1, =InFileHandle		@@ set pointer to handler to r1
 	ldr r0, [r1]			@@ dereference pointer to handler
 	swi 0x6c			@@ read int
+	bcs printlist
 	mov r1, r0			@ move int read into r1
 	mov pc, lr			@ mov to next line of line that called it
 
@@ -122,9 +123,12 @@ printlist:	@ prints linked list
 printlistloop:
 	cmp r0, #0
 	beq printlistendloop
-	mov r1, [r0, #4]	@@ copy int of node into r1
+	str r1, [r0, #4]	@@ copy int of node into r1
 	swi 0x00		@@ display integer read in
-	swi 0x02 =commaSeparator	@@ display comma onto console
+	mov r2, r0
+	ldr r0, =commpaSeparator
+	swi 0x02		@@ display comma onto console
+	mov r0, r2
 	ldr r0, [r0]		@@ load next node
 	b printlistloop
 printlistendloop:
