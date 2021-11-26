@@ -145,7 +145,7 @@ printlistloop:
 	ldr r0, [r0]
 	ldr r1, =commaSeparator
 	swi 0x69		@@ display comma onto console
-	ldr r0, [r3, #4]
+	ldr r0, [r3, #0]
 	b printlistloop
 printlistendloop:
 	mov pc, lr
