@@ -90,7 +90,7 @@ readstr: @ reads a string from txt file
 readcmd: @ reads command from text file
 	bl readstr
 	cmp r0, #112 			@@ 112 = p - push
-	beq push
+	bleq push
 	cmp r0, #102			@@ 104 = f - find
 	@@ TODO: beq find
 	@@ potentially make one for delete
@@ -116,7 +116,19 @@ pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
 	mov r1, #0		@@ init r3 to null pointer
 	str r1, [r0]		@@ set next pointer to be null in last node
 	str r0, [r3, #0]	@@ store next pointer
-	
+	mov pc, lr
+printlist:	@ prints linked list
+	ldr r0, =head
+printlistloop:
+	cmp r0, #0
+	beq printlistendloop
+	mov r1, [r0, #4]	@@ copy int of node into r1
+	swi 0x00		@@ display integer read in
+	swi 0x02 =commaSeparator	@@ display comma onto console
+	ldr r0, [r0]		@@ load next node
+	b printlistloop
+printlistendloop:
+	mov pc, lr
 
 
 .data
@@ -141,4 +153,6 @@ CommandsFileHandle: .word 0
 CommandsStorage: .skip 999
 .align 4
 CurrCmdIndex: .word 0
+.align 4
+commaSeparator: .asciz ", "
 
