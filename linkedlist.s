@@ -1,173 +1,183 @@
-.align
 main:
 
 	@@@@@@@@@@ READ INT FROM FILE
 
+	@@@ init index @@@
+	mov r0, #0
+	ldr r1, =CurrCmdIndex
+	str r0, [r1]
+
 	ldr r0, =InFileName		@ set r0 = name of file
 	mov r1, #0			@ set r1 = type of mode (0 = input)
 	swi 0x66 			@ swi command for opening a file, assigns r0 to the file handle
-	mov r2, r0			@ save file handle in r1
 	ldr r1, =InFileHandle
 	str r0, [r1]
-	str r2, [r0]
 
-	@@@ initialize cmdhandle and command string
+	@@ stored file handle in input file
 
-	mov r1, #0			@@ load mode as input for opening file
-	ldr r0, =CmdFileName		@@ load command file handle into r0
-	swi 0x66			@@ set r0 = fileHandle
-	ldr r1, =CmdFileHandle		@@ load cmd file pointer into r1
-	str r0, [r1, #1]		@@ store cmd file handle into cmdfilehandle pointer
-	ldr r1, =CmdList		@@ load storage command string
-	mov r2, #99			@@ load max # of bytes to store to 9999
-	swi 0x6a			@@ load string into CmdList
-	ldrb r0, [r1,#0]
-	swi 0x00
+	ldr r0, =CmdFileName			@ initialize r0 to file name
+	mov r1, #2				@ initialize handler for input
+	swi 0x66				@ set r0 = file handler
+	ldr r1, =CmdFileHandle			@ set r1 = pointer to file handler
+	str r0, [r1]
 
-	@read first integer from file
+	@@ allocating commands file handle
 
-	ldr r1, =InFileHandle 		@ load pointer to file handle into r1
-	ldr r0, [r1, #3]		@ load file handle from dereferenced r1 pointer r1->filehandle
-	swi 0x6c			@ read integer into r0
+	ldr r0, =CommandsFileName		@@ init r0 to file name
+	mov r1, #0
+	swi 0x66
+	ldr r1, =CommandsFileHandle
+	str r0, [r1]
 
-	@@@@ --- initialize root node
+	@@@ load commands into string
+	
+	ldr r1, =CommandsStorage
+	mov r2, #99
+	swi 0x6a
 
-	mov r1, r0 			@ move integer read into r1
+	@@ read first integer from file
 
-	mov r0, #8			@ pre-assign amount of bytes to allocate into r8
+	ldr r1, =InFileHandle
+	ldr r0, [r1]				@ read integer from input file, and load into r0
+	swi 0x6c
 
-	swi 0x12			@ allocate 3 bytes of space and place addr into r0
+	@@ init root node
 
-	ldr r12, =head 			@ load pointer to head into r12
+	mov r1, r0				@ store integer read into r1
+	mov r0, #8				@ prepare to allocate for node
+	swi 0x12
+	ldr r12, =head				@ load pointer to head in r12
+	str r0, [r12]				@ store pointer to head in pointer to head label
+	str r1, [r0, #4]			@ store integer ( node value ) into head's 4-8 bytes
+	@@ correct
+	ldr r12, =tail
+	str r0, [r12]				@ store pointer to node in tail
+	@@ INIT NULL POINTER to both tail and heads next
+	mov r1, #0
+	ldr r12, [r12]
+	str r1, [r12, #0]			@ store null pointer in tails next
+	ldr r12, =head
+	ldr r12, [r12]
+	str r1, [r12, #0]			@ store null pointer in heads next
+	
+	ldr r1, =head				@@ DEBUG
+	ldr r1, [r1]				@@ DEBUG
+	ldr r4, [r1, #4]			@@ DEBUG
 
-	str r0, [r12, #0]		@ store new node address into head
+	@@@ <<<<<<<<<<<<<<<< ROOT NODE INITIALIZED >>>>>>>>>>>>>>>>>>>>>> @@@
 
-	ldr r12, =tail			@ load pointer to tail into r12
-
-	str r0, [r12, #0]		@ store root node into tail pointer
-
-	str r1, [r0, #0]		@ saving integer into root node's integer addr
-
-	mov r3, #0			@ set r3 to null
-
-	str r3, [r0, #4]		@ set next pointer to null
+	@@@ <<<<<<<<<< NODE FORMAT >>>>>>>>>> @@@
+	@@		NODE[0] = NEXT POINTER
+	@@		NODE[4] = INT VALUE
 
 	b readcmd
 
-	@@@@ PUSH
+readint: @ reads int into r0 and then stores result in r1
+	ldr r1, =InFileHandle		@@ set pointer to handler to r1
+	ldr r0, [r1]			@@ dereference pointer to handler
+	swi 0x6c			@@ read int
+	bcs printlist
+	mov r1, r0			@ move int read into r1
+	mov pc, lr			@ mov to next line of line that called it
 
-	push: @ pushes a node to the end of the list
+readstr: @ reads a string from txt file
+	ldr r1, =CurrCmdIndex		@@ load pointer to current index of command into r1
+	ldr r0, [r1]			@@ load current index into r0
+	ldr r1, =CommandsStorage		@@ load current string
+	ldrb r2, [r1, r0]		@@ load character at string[r0]
+	ldr r1, =CurrCmdIndex
+	add r0, r0, #2			@@ add two spaces to currIndex of commmand
+	str r0, [r1]			@@ store incremented index into CurrCmdIndex pointer
+	mov r0, r2			@@ store command in r0
+	mov pc, lr
 
-		bl readint 		@ make r1 = next int in file
-		mov r0, #8 		@ set r0 to be 8 bytes for allocation at next step
-		swi 0x12 		@ allocate 8 bytes because r0 is 8
-		@@  debugged --- commented out to run | str r1 [ r0, #0 ] 	@ set new node value to be r1
-		mov r6, r1
-		mov r1, #0 		@ set r1 to be null
-		str r1, [ r0, #4 ] 		@ set new node next to be null
-		ldr r2, =tail 		@ load tail data header into r2
-		ldr r2, [r2] 		@ dereference tail
-		str r0, [ r2, #4 ] 		@ store address of new node in tails next
-		ldr r2, =tail 		@ load tail into r2 again to change the tail's pointer addr
-		str r0, [r2] 		@ store node to where tails pointer is pointing to, so new node = tail
+readcmd: @ reads command from text file
+	bl readstr
+	cmp r0, #112 			@@ 112 = p - push
+	bleq push
+	cmp r0, #102			@@ 104 = f - find
+	cmp r0, #0			@@ done reading, printList
+	b printlist
+	@@ TODO: beq find
+	@@ potentially make one for delete
 
-	readint: @ reads int into r0 and then stores the result into r1
-		
-		ldr r1, =InFileHandle
-		ldr r0, [ r1, #0 ] 		@ load file handle into r0
-		swi 0x6c 		@ r0 = int read
-		mov r1, r0 		@ move int read into r1
-		mov pc, lr		@ move to next line where read was called from
+push:	@@ appends node onto list
+	@@@@ ARGS
+	@@@ r1 = number to push
+	@@@ r0 = pointer that we will be cycling down with r2
+	bl readint	 @@ store int to push into r1
+	ldr r0, =head	 @@ store head pointer into r0
+	ldr r0, [r0]
+	ldr r4, [r0, #4]	@@ DEBUG
+pushloop:	@@ test, see if weve reached the end of the list
+	ldr r2, [r0,#0]		@@ check next pointer
+	cmp r2, #0		@ if null, then we found the spot to create new node
+	beq pushdone
+	ldr r0, [r0, #4]	@ set next point to next node
+	b pushloop
+pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
+	  @@ ARGS
+	mov r3, r0		@@ copy pointer to current spot to r3
+	mov r0, #8
+	ldr r4, [r3, #4]	@@ DEBUG
+	swi 0x12		@@ allocate 2 bytes for node to be placed at
+	ldr r4, [r3, #4]	@@ DEBUG
+	str r1, [r0, #4]	@@ store int at base addr of r0
+	mov r1, #0		@@ init r3 to null pointer
+	str r1, [r0]		@@ set next pointer to be null in last node
+	ldr r4, [r3, #4]	@@ DEBUG	<--- this is where bug happens
+	str r0, [r3, #0]	@@ store next pointer
+	bl printlist
+	b readcmd
+printlist:	@ prints linked list
+	ldr r0, =head
+	ldr r0, [r0]		@@ dereference node
+printlistloop:
+	cmp r0, #0
+	mov r3, r0		@@ set r3 to currNode
+	beq printlistendloop
+	ldr r1, [r0, #4]	@@ copy int of node into r1
+	ldr r0, =CmdFileHandle
+	ldr r0, [r0]
+	swi 0x6b		@@ display integer read in
+	mov r0, r1
+	ldr r0, =CmdFileHandle
+	ldr r0, [r0]
+	ldr r1, =commaSeparator
+	swi 0x69		@@ display comma onto console
+	ldr r0, [r3, #0]
+	b printlistloop
+printlistendloop:
+	mov pc, lr
 
-	readstr: @ reads a string from the txt file
-		
-		ldr r3, =CurrCmdIndex
-		ldrb r2, [r3]		@ load current index from CurrCmdIndex
-		ldr r1, =CmdList	@ load command string into r1
-		ldrb r0, [r1,r2]	@ load character from cmdList
-		swi 0x00 		@ prints out character
-		add r2, r2, #2		@ increment index by 2 to move onto next command
-		str r2, [r3]		@@ store incremented index into 
-		mov pc, lr		@ move to next line after the readstr call
-	
-	readcmd: @ reads command from txt file
-		bl readstr		@ read command from file
-		mov r3, r1		@ move string read into r3
-		cmp r3, #0x66		@ check if command is f for find
-		bleq readint		@ read integer into r1
-		beq contains		@ go to contains loop if command is f
-		cmp r3, #0x70		@ check if command is p for push
-		beq push		@ if command is equal, move to push
-
-	fndfnc:	@@ outputs found and the number to the file
-		ldr r0, =found
-		swi 0x02
-		mov r0, r2
-		swi 0x00
-		mov pc, lr
-
-	nffnc: @@ outputs not found and the number to the file
-		ldr r0, =nfound
-		swi 0x02
-		mov r0, r2
-		swi 0x00
-		
-
-	clear:	@ clears whole list
-		ldr r0, =head		@ load in head pointer
-		ldr r0, [r0]		@ dereference head pointer
-		mov r3, #0
-	clearloop:
-		cmp r0, #0
-		beq cleared
-		ldr r1, [r0, #4]
-		str r3, [r0]
-		str r3, [r0, #4]
-		mov r0, r1
-		b clearloop
-	cleared:
-		ldr r0, =head
-		str r3, [r0]
-		ldr r0, =tail
-		str r3, [r0]
-		mov pc, lr
-
-	contains:
-		ldr r1, =head 		@ load head into r1 because r0 = search int
-		ldr r1, [r1] 		@ dereference node
-
-	searchloop:
-		cmp r1, #0 		@ if node we are on is null then end loop
-		beq nffnc		@ finish loop if N == null
-		ldr r2, [r1, #0]	@ load int from node we are on currently
-		cmp r2, r0		@ compare int from current node to search integer
-		beq fndfnc		@ branch to found if we found the integer
-		ldr r1, [ r1, #4 ]	@ move to next node
-		b searchloop
-	
-
-	@@@@ TODO --- delete with index
-
-	@@@@ TODO --- contains
-
-	@@@@ TODO --- pop
-
-	@@@@ TODO --- removeHead
-
-	@@@@ TODO --- removeTail
-
+halt:
+	swi 0x11
 
 .data
-@head: .word 0
-@tail: .word 0
-InFileName: .ascii "list.txt\0"
+
+.align 4
+head: .word 0
+.align 4
+tail: .word 0
+.align 4
+InFileName: .asciz "list.txt"
+.align 4
 InFileHandle: .word 0
-@Space: .ascii " \0"
-@found: .ascii "Found!\0"
-@nfound: .ascii "Not Found\0"
-@OutFileName: .ascii "output.txt\0"
-@OutFileHandle: .word 4
-@CmdFileName: .ascii "cmd.txt\0"
-@CmdFileHandle: .word 4
-@CmdList: .skip 9999
-@CurrCmdIndex: .byte 0
+.align 4
+CmdFileName: .asciz "cmd.txt"
+.align 4
+CmdFileHandle: .word 0
+.align 4
+CommandsFileName: .asciz "commands.txt"
+.align 4
+CommandsFileHandle: .word 0
+.align 4
+CommandsStorage: .skip 999
+.align 4
+CurrCmdIndex: .word 0
+.align 4
+commaSeparator: .asciz ", "
+.align 4
+OutputFileName: .asciz "output.txt"
+.align 4
+OutputFileHandler: .word 0
