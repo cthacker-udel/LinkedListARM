@@ -50,17 +50,16 @@ main:
 	swi 0x12
 	ldr r12, =head				@ load pointer to head in r12
 	str r0, [r12]				@ store pointer to head in pointer to head label
-	mov r3, #0				@ set null value to be 0
-	str r3, [r0]				@ set next pointer of new node to be NULL
 	str r1, [r0, #4]			@ store integer ( node value ) into head's 4-8 bytes
 	@@ correct
 	ldr r12, =tail
 	str r0, [r12]				@ store pointer to node in tail
 	str r1, [r0, #4]			@ storing integer in tails node value spot
+	@@ INIT NULL POINTER to both tail and heads next
 	mov r1, #0
-	str r1, [r12, #8]			@ store null pointer in tails next
+	str r1, [r12, #0]			@ store null pointer in tails next
 	ldr r12, =head
-	str r1, [r12, #8]			@ store null pointer in heads next
+	str r1, [r12, #0]			@ store null pointer in heads next
 	
 	@@@ <<<<<<<<<<<<<<<< ROOT NODE INITIALIZED >>>>>>>>>>>>>>>>>>>>>> @@@
 
@@ -89,7 +88,7 @@ readcmd: @ reads command from text file
 	cmp r0, #112 			@@ 112 = p - push
 	beq push
 	cmp r0, #102			@@ 104 = f - find
-	beq find
+	@@ TODO: beq find
 	@@ potentially make one for delete
 
 push:	@@ appends node onto list
