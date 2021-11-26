@@ -63,6 +63,10 @@ main:
 	
 	@@@ <<<<<<<<<<<<<<<< ROOT NODE INITIALIZED >>>>>>>>>>>>>>>>>>>>>> @@@
 
+	@@@ <<<<<<<<<< NODE FORMAT >>>>>>>>>> @@@
+	@@		NODE[0] = NEXT POINTER
+	@@		NODE[4] = INT VALUE
+
 	b readcmd
 
 readint: @ reads int into r0 and then stores result in r1
@@ -108,8 +112,10 @@ pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
 	mov r3, r0		@@ copy pointer to current spot to r3
 	mov r0, #4
 	swi 0x12		@@ allocate 2 bytes for node to be placed at
-	str r1, [r0]		@@ store int at base addr of r0
-	str r0, [r3, #8]	@@ store next pointer
+	str r1, [r0, #4]	@@ store int at base addr of r0
+	mov r1, #0		@@ init r3 to null pointer
+	str r1, [r0]		@@ set next pointer to be null in last node
+	str r0, [r3, #0]	@@ store next pointer
 	
 
 
