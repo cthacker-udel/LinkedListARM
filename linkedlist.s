@@ -101,6 +101,8 @@ readcmd: @ reads command from text file
 	@@ TODO: beq find
 	@@ potentially make one for delete
 
+find: @@ searches through the loop
+
 push:	@@ appends node onto list
 	@@@@ ARGS
 	@@@ r1 = number to push
@@ -181,3 +183,5 @@ commaSeparator: .asciz ", "
 OutputFileName: .asciz "output.txt"
 .align 4
 OutputFileHandler: .word 0
+.align 4
+findingAnnouncer: .asciz "Searching for "
