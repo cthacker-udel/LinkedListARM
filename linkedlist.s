@@ -104,7 +104,26 @@ readcmd: @ reads command from text file
 find: @@ searches through the loop
 	bl readint		@@ store int read into r1
 	ldr r0, =head		@ load head node into r0
+findloop: @@ loops through nodes
+	ldr r2, [r0]		@@ accessing node of head
+	cmp r2, #0
+	beq notfound		@@ if r2 == NULL, we have reached end of the list
+	cmp r0, r2
+	beq found
 
+notfound:	@ we have reached end of list and have not found node
+	ldr r0, =OutputFileHandler	@ load outputfilehandler into r0
+	ldr r0, [r0]			@ dereference outputfilehandler
+	ldr r1, =notFoundNumber		@ load string to r1
+	swi 0x69
+	b readcmd			@ end find loop, load next command
+
+found:
+	ldr r0, =OutputFileHandler
+	ldr r0, [r0]		@ dereference file handler
+	ldr r1, =foundNumber	@ load string addr into r1
+	swi 0x69		@ write to file
+	b readcmd		@ end loop
 
 
 push:	@@ appends node onto list
