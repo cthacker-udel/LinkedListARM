@@ -102,6 +102,10 @@ readcmd: @ reads command from text file
 	@@ potentially make one for delete
 
 find: @@ searches through the loop
+	bl readint		@@ store int read into r1
+	ldr r0, =head		@ load head node into r0
+
+
 
 push:	@@ appends node onto list
 	@@@@ ARGS
@@ -185,3 +189,7 @@ OutputFileName: .asciz "output.txt"
 OutputFileHandler: .word 0
 .align 4
 findingAnnouncer: .asciz "Searching for "
+.align 4
+foundNumber: .asciz "Found it! "
+.align 4
+notfoundNumber: .asciz "Did not find "
