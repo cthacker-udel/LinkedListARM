@@ -96,6 +96,7 @@ readcmd: @ reads command from text file
 	cmp r0, #112 			@@ 112 = p - push
 	bleq push
 	cmp r0, #102			@@ 104 = f - find
+	beq find
 	cmp r0, #0			@@ done reading, printList
 	b printlist
 	@@ TODO: beq find
@@ -104,12 +105,16 @@ readcmd: @ reads command from text file
 find: @@ searches through the loop
 	bl readint		@@ store int read into r1
 	ldr r0, =head		@ load head node into r0
+	ldr r0, [r0]
 findloop: @@ loops through nodes
-	ldr r2, [r0]		@@ accessing node of head
-	cmp r2, #0
-	beq notfound		@@ if r2 == NULL, we have reached end of the list
-	cmp r0, r2
+	ldr r2, [r0, #4]		@@ value of currnode
+	cmp r2, r1			@@ see if we found the value
 	beq found
+	ldr r2, [r0]
+	cmp r2, #0			@@ check if pointer to next is null
+	beq notfound			@@ branch to notfound if we reached the last node and still have not found the value
+	ldr r0, [r0,#0]			@@ move r0 to next node
+	b findloop				@@ repeat loop with next node
 
 notfound:	@ we have reached end of list and have not found node
 	ldr r0, =OutputFileHandler	@ load outputfilehandler into r0
@@ -211,4 +216,4 @@ findingAnnouncer: .asciz "Searching for "
 .align 4
 foundNumber: .asciz "Found it! "
 .align 4
-notfoundNumber: .asciz "Did not find "
+notFoundNumber: .asciz "Did not find "
