@@ -155,6 +155,8 @@ pushdone: @@ r0s #8 index is a NULL pointer, update it to be a node
 	str r1, [r0, #4]	@@ store int at base addr of r0
 	mov r1, #0		@@ init r3 to null pointer
 	str r1, [r0]		@@ set next pointer to be null in last node
+	ldr r4, =tail		@@ make tail point to last node
+	str r0, [r4]		@@ set tails base address to store the address of the node
 	ldr r4, [r3, #4]	@@ DEBUG	<--- this is where bug happens
 	str r0, [r3, #0]	@@ store next pointer
 	bl printlist
