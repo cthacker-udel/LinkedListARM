@@ -7,3 +7,7 @@
 > Controls all of the values that correspond with the commands
 #### Commands.txt
 > Controls all of the commands that we will be using with the values in list.txt
+
+
+Simple data structure in ARM --- potential future projects include: Binary Tree, double linked list
+
