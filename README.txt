@@ -8,6 +8,9 @@
 #### Commands.txt
 > Controls all of the commands that we will be using with the values in list.txt
 
+--
 
-Simple data structure in ARM --- potential future projects include: Binary Tree, double linked list
+> Simple data structure in ARM --- potential future projects include: Binary Tree, double linked list
 
+
+## change log -- last edit 1/15/22
