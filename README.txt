@@ -12,5 +12,5 @@
 
 > Simple data structure in ARM --- potential future projects include: Binary Tree, double linked list
 
-   commit 2/18
+   commit 2/20
 ## change log -- last edit 1/26/22
